@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>[Product Name] | Interactive Cooking Assistant</title>
+  <meta name="description" content="A voice-guided cooking assistant with step-by-step instructions, video demonstrations, and personalized tips.">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  <header class="topbar">
+    <button class="brand" data-nav="library" aria-label="Back to recipe library">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span class="brand-name">[Product Name]</span>
+    </button>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" id="handsFreeToggle" aria-pressed="false" title="Large type, always-on microphone, screen stays awake">
+        Hands-free
+      </button>
+      <button class="btn btn-ghost" id="profileOpen">My kitchen</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- Library view -->
+    <section id="view-library" class="view" aria-labelledby="libraryHeading">
+      <div class="hero">
+        <p class="eyebrow" id="greeting">Welcome to the kitchen</p>
+        <h1 id="libraryHeading">What are we cooking today?</h1>
+        <p class="lede">Choose a recipe and the assistant walks you through every step. Speak a command, watch a technique, or ask for a tip whenever you need one.</p>
+      </div>
+      <div class="recipe-grid" id="recipeGrid"></div>
+    </section>
+
+    <!-- Recipe overview -->
+    <section id="view-overview" class="view" hidden aria-labelledby="overviewTitle">
+      <button class="btn btn-link" data-nav="library">← All recipes</button>
+      <div class="overview">
+        <div class="overview-main">
+          <p class="eyebrow" id="overviewMeta"></p>
+          <h1 id="overviewTitle"></h1>
+          <p class="lede" id="overviewSummary"></p>
+          <div class="profile-notes" id="profileNotes" hidden></div>
+          <button class="btn btn-primary btn-lg" id="startCooking">Start cooking</button>
+        </div>
+        <aside class="card ingredients-card" aria-labelledby="ingredientsHeading">
+          <div class="ingredients-head">
+            <h2 id="ingredientsHeading">Ingredients</h2>
+            <div class="scaler" role="group" aria-label="Servings">
+              <button class="btn btn-icon" id="servingsDown" aria-label="Fewer servings">−</button>
+              <span><strong id="servingsValue">4</strong> servings</span>
+              <button class="btn btn-icon" id="servingsUp" aria-label="More servings">+</button>
+            </div>
+          </div>
+          <ul class="ingredient-list" id="ingredientList"></ul>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Cook mode -->
+    <section id="view-cook" class="view" hidden aria-labelledby="cookTitle">
+      <div class="cook-head">
+        <button class="btn btn-link" id="exitCook">← Overview</button>
+        <h1 id="cookTitle" class="cook-title"></h1>
+        <div class="progress" aria-hidden="true"><div class="progress-bar" id="progressBar"></div></div>
+      </div>
+
+      <div class="cook-layout">
+        <div class="step-panel card">
+          <p class="eyebrow" id="stepCount"></p>
+          <p class="step-text" id="stepText" aria-live="polite"></p>
+
+          <div class="tip" id="tipBox" hidden>
+            <span class="tip-label">Tip for you</span>
+            <p id="tipText"></p>
+          </div>
+
+          <div class="step-actions">
+            <button class="btn btn-secondary" id="prevStep">Back</button>
+            <button class="btn btn-ghost" id="repeatStep">Read aloud</button>
+            <button class="btn btn-ghost" id="tipStep">Tip</button>
+            <button class="btn btn-ghost" id="timerStep" hidden>Start timer</button>
+            <button class="btn btn-primary" id="nextStep">Next</button>
+          </div>
+        </div>
+
+        <div class="side-panel">
+          <div class="card video-card">
+            <div class="video-frame" id="videoFrame"></div>
+          </div>
+
+          <div class="card timers-card" id="timersCard" hidden>
+            <h2>Timers</h2>
+            <ul class="timer-list" id="timerList"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Voice dock, shown in cook mode -->
+  <div class="voice-dock" id="voiceDock" hidden>
+    <button class="mic" id="micToggle" aria-pressed="false" aria-label="Turn voice commands on">
+      <span class="mic-dot" aria-hidden="true"></span>
+      <span id="micLabel">Voice off</span>
+    </button>
+    <p class="heard" id="heard" aria-live="polite">Say “next”, “repeat”, or “help”.</p>
+    <form class="command-form" id="commandForm" autocomplete="off">
+      <label class="sr-only" for="commandInput">Type a command</label>
+      <input id="commandInput" placeholder="Or type a command" />
+    </form>
+    <button class="btn btn-ghost btn-sm" id="helpOpen">Commands</button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Profile dialog -->
+  <dialog id="profileDialog" aria-labelledby="profileHeading">
+    <form method="dialog" id="profileForm">
+      <h2 id="profileHeading">My kitchen</h2>
+      <p class="muted">Your answers shape the tips and flag ingredients to watch. They stay in this browser.</p>
+
+      <label class="field">
+        <span>First name</span>
+        <input name="name" placeholder="Optional">
+      </label>
+
+      <fieldset class="field">
+        <legend>How comfortable are you in the kitchen?</legend>
+        <label class="choice"><input type="radio" name="skill" value="beginner"> Just starting out</label>
+        <label class="choice"><input type="radio" name="skill" value="intermediate"> Comfortable with the basics</label>
+        <label class="choice"><input type="radio" name="skill" value="confident"> Confident and curious</label>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Dietary preferences</legend>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" name="diet" value="vegetarian"> Vegetarian</label>
+          <label class="chip"><input type="checkbox" name="diet" value="vegan"> Vegan</label>
+          <label class="chip"><input type="checkbox" name="diet" value="gluten-free"> Gluten-free</label>
+          <label class="chip"><input type="checkbox" name="diet" value="dairy-free"> Dairy-free</label>
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
+        <legend>Allergies</legend>
+        <div class="chips">
+          <label class="chip"><input type="checkbox" name="allergy" value="dairy"> Dairy</label>
+          <label class="chip"><input type="checkbox" name="allergy" value="eggs"> Eggs</label>
+          <label class="chip"><input type="checkbox" name="allergy" value="gluten"> Gluten</label>
+          <label class="chip"><input type="checkbox" name="allergy" value="nuts"> Tree nuts and peanuts</label>
+          <label class="chip"><input type="checkbox" name="allergy" value="fish"> Fish</label>
+          <label class="chip"><input type="checkbox" name="allergy" value="shellfish"> Shellfish</label>
+          <label class="chip"><input type="checkbox" name="allergy" value="soy"> Soy</label>
+        </div>
+      </fieldset>
+
+      <label class="choice">
+        <input type="checkbox" name="speak" checked> Read each step aloud
+      </label>
+
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn btn-primary" value="save" id="profileSave">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Help dialog -->
+  <dialog id="helpDialog" aria-labelledby="helpHeading">
+    <h2 id="helpHeading">Voice commands</h2>
+    <p class="muted">Speak naturally. The assistant listens for these phrases.</p>
+    <dl class="commands">
+      <dt>“Next” / “Back”</dt><dd>Move between steps</dd>
+      <dt>“Repeat”</dt><dd>Hear the current step again</dd>
+      <dt>“Tip”</dt><dd>Get advice matched to your skill level</dd>
+      <dt>“Start timer”</dt><dd>Start the step’s timer, or say “set a timer for 5 minutes”</dd>
+      <dt>“Stop timer”</dt><dd>Cancel the most recent timer</dd>
+      <dt>“How much garlic?”</dt><dd>Hear the scaled amount of any ingredient</dd>
+      <dt>“Ingredients”</dt><dd>Hear the full list</dd>
+      <dt>“Play video” / “Pause video”</dt><dd>Control the demonstration</dd>
+      <dt>“Go to step 3”</dt><dd>Jump to any step</dd>
+      <dt>“Stop talking”</dt><dd>Silence the assistant</dd>
+    </dl>
+    <form method="dialog" class="dialog-actions">
+      <button class="btn btn-primary">Got it</button>
+    </form>
+  </dialog>
+
+  <footer class="footer">
+    <p>[Product Name] · [Organization Name] · [contact@email.com] · [City, State]</p>
+    <p class="muted">Prototype. Always check labels for allergens.</p>
+  </footer>
+
+  <script src="data/recipes.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
