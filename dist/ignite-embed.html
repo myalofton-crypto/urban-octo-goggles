@@ -1,0 +1,1201 @@
+<!-- Cooking assistant embed. Paste into a Custom Code (Custom JS/HTML) element. -->
+<!-- Adjust the height to suit your page. Voice needs the page served over https. -->
+<iframe title="Interactive cooking assistant"
+  style="width:100%;height:90vh;min-height:720px;border:0;border-radius:14px;display:block;"
+  allow="microphone; autoplay; screen-wake-lock; fullscreen; encrypted-media"
+  srcdoc="&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+  &lt;meta charset=&quot;utf-8&quot;&gt;
+  &lt;meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1&quot;&gt;
+  &lt;title&gt;[Product Name] | Interactive Cooking Assistant&lt;/title&gt;
+  &lt;meta name=&quot;description&quot; content=&quot;A voice-guided cooking assistant with step-by-step instructions, video demonstrations, and personalized tips.&quot;&gt;
+  &lt;style&gt;
+/* Palette: navy and gold. Change the tokens below to rebrand. */
+:root {
+  --navy-900: #0b1a33;
+  --navy-800: #13284d;
+  --navy-700: #1c3766;
+  --navy-100: #e8edf6;
+  --gold-500: #c9a227;
+  --gold-400: #d8b64a;
+  --gold-100: #f8f0d6;
+  --ink: #1a2233;
+  --muted: #5b6577;
+  --paper: #fbfaf6;
+  --white: #ffffff;
+  --danger: #a8322d;
+  --radius: 14px;
+  --shadow: 0 6px 24px rgba(11, 26, 51, 0.08);
+  --font-body: &quot;Source Sans 3&quot;, &quot;Segoe UI&quot;, system-ui, -apple-system, sans-serif;
+  --font-display: &quot;Playfair Display&quot;, Georgia, &quot;Times New Roman&quot;, serif;
+  --step-size: 1.6rem;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 16px; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.55;
+  padding-bottom: 7rem;
+}
+
+h1, h2 { font-family: var(--font-display); color: var(--navy-900); line-height: 1.2; }
+h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); margin: 0.25rem 0 0.75rem; }
+h2 { font-size: 1.35rem; margin: 0 0 0.75rem; }
+
+.muted { color: var(--muted); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.skip-link { position: absolute; left: -999px; top: 0; background: var(--gold-500); color: var(--navy-900); padding: 0.5rem 1rem; z-index: 10; }
+.skip-link:focus { left: 1rem; }
+
+:focus-visible { outline: 3px solid var(--gold-500); outline-offset: 2px; }
+
+/* Top bar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+  background: var(--navy-900); color: var(--white);
+  position: sticky; top: 0; z-index: 5;
+}
+.brand { display: flex; align-items: center; gap: 0.6rem; background: none; border: 0; color: inherit; cursor: pointer; font: inherit; padding: 0; }
+.brand-mark { color: var(--gold-500); font-size: 1.4rem; }
+.brand-name { font-family: var(--font-display); font-size: 1.25rem; letter-spacing: 0.02em; }
+.topbar-actions { display: flex; gap: 0.5rem; }
+.topbar .btn-ghost { color: var(--white); border-color: rgba(255,255,255,0.25); }
+.topbar .btn-ghost[aria-pressed=&quot;true&quot;] { background: var(--gold-500); color: var(--navy-900); border-color: var(--gold-500); }
+
+main { max-width: 1180px; margin: 0 auto; padding: clamp(1.25rem, 4vw, 2.5rem); }
+
+/* Buttons */
+.btn {
+  font: inherit; font-weight: 600; cursor: pointer;
+  border-radius: 999px; padding: 0.6rem 1.15rem;
+  border: 1.5px solid transparent; transition: background 0.15s, transform 0.05s;
+}
+.btn:active { transform: translateY(1px); }
+.btn-primary { background: var(--navy-800); color: var(--white); }
+.btn-primary:hover { background: var(--navy-700); }
+.btn-secondary { background: var(--white); color: var(--navy-800); border-color: var(--navy-800); }
+.btn-ghost { background: transparent; color: var(--navy-800); border-color: var(--navy-100); }
+.btn-ghost:hover { border-color: var(--gold-500); }
+.btn-link { background: none; border: 0; color: var(--navy-700); padding: 0.25rem 0; }
+.btn-link:hover { text-decoration: underline; }
+.btn-icon { width: 2.2rem; height: 2.2rem; padding: 0; background: var(--navy-100); color: var(--navy-900); font-size: 1.2rem; }
+.btn-lg { padding: 0.85rem 1.8rem; font-size: 1.1rem; }
+.btn-sm { padding: 0.35rem 0.8rem; font-size: 0.9rem; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 1.5rem; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.8rem; font-weight: 700; color: var(--gold-500); margin: 0; }
+.lede { font-size: 1.1rem; color: var(--muted); max-width: 60ch; }
+
+/* Library */
+.hero { margin-bottom: 2rem; }
+.recipe-grid { display: grid; gap: 1.25rem; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+.recipe-card {
+  text-align: left; font: inherit; color: inherit; cursor: pointer;
+  border: 0; display: flex; flex-direction: column; gap: 0.5rem;
+  border-top: 5px solid var(--gold-500);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.recipe-card:hover { transform: translateY(-3px); box-shadow: 0 12px 30px rgba(11,26,51,0.12); }
+.recipe-card h2 { margin: 0; }
+.recipe-card p { margin: 0; color: var(--muted); }
+.meta-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: auto; padding-top: 0.5rem; }
+.pill { font-size: 0.8rem; padding: 0.2rem 0.65rem; border-radius: 999px; background: var(--navy-100); color: var(--navy-800); font-weight: 600; }
+.pill-warn { background: #fbe4e2; color: var(--danger); }
+.pill-gold { background: var(--gold-100); color: #7a5f0e; }
+
+/* Overview */
+.overview { display: grid; gap: 2rem; grid-template-columns: 1.2fr 1fr; align-items: start; margin-top: 1rem; }
+.ingredients-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.ingredients-head h2 { margin: 0; }
+.scaler { display: flex; align-items: center; gap: 0.6rem; }
+.ingredient-list { list-style: none; padding: 0; margin: 0; }
+.ingredient-list li { padding: 0.6rem 0; border-bottom: 1px solid var(--navy-100); }
+.ingredient-list li:last-child { border-bottom: 0; }
+.qty { font-weight: 700; color: var(--navy-800); }
+.flag { display: block; font-size: 0.9rem; color: var(--danger); margin-top: 0.2rem; }
+.flag em { color: var(--ink); font-style: normal; font-weight: 600; }
+.profile-notes { background: var(--gold-100); border-left: 4px solid var(--gold-500); padding: 0.85rem 1rem; border-radius: 8px; margin: 1rem 0 1.5rem; }
+.profile-notes p { margin: 0.2rem 0; }
+
+/* Cook mode */
+.cook-head { display: grid; grid-template-columns: auto 1fr; gap: 0.25rem 1rem; align-items: center; margin-bottom: 1.25rem; }
+.cook-title { font-size: 1.4rem; margin: 0; }
+.progress { grid-column: 1 / -1; height: 6px; background: var(--navy-100); border-radius: 999px; overflow: hidden; }
+.progress-bar { height: 100%; width: 0; background: var(--gold-500); transition: width 0.3s; }
+.cook-layout { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: start; }
+.step-text { font-size: var(--step-size); line-height: 1.4; color: var(--navy-900); margin: 0.6rem 0 1.25rem; min-height: 4.5em; }
+.tip { background: var(--navy-100); border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 1.25rem; }
+.tip-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; color: var(--navy-700); }
+.tip p { margin: 0.25rem 0 0; }
+.step-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.step-actions #nextStep { margin-left: auto; }
+.side-panel { display: grid; gap: 1.25rem; }
+.video-card { padding: 0; overflow: hidden; }
+.video-frame { aspect-ratio: 16 / 9; background: var(--navy-900); color: var(--white); display: grid; place-items: center; }
+.video-frame video, .video-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+.video-placeholder { text-align: center; padding: 1.5rem; }
+.video-placeholder .play { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--gold-500); display: grid; place-items: center; margin: 0 auto 0.75rem; color: var(--gold-500); font-size: 1.5rem; }
+.video-placeholder p { margin: 0.2rem 0; color: #c7d0e0; font-size: 0.95rem; }
+.video-placeholder strong { color: var(--white); }
+
+.timer-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.6rem; }
+.timer { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.6rem 0.85rem; border-radius: 10px; background: var(--navy-100); }
+.timer-time { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 1.4rem; color: var(--navy-900); }
+.timer.done { background: var(--gold-100); animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { box-shadow: 0 0 0 4px rgba(201,162,39,0.35); } }
+
+/* Voice dock */
+.voice-dock {
+  position: fixed; left: 50%; bottom: 1rem; transform: translateX(-50%);
+  width: min(960px, calc(100% - 2rem));
+  display: flex; align-items: center; gap: 0.75rem;
+  background: var(--navy-900); color: var(--white);
+  border-radius: 999px; padding: 0.55rem 0.6rem 0.55rem 0.6rem;
+  box-shadow: 0 10px 30px rgba(11,26,51,0.3); z-index: 6;
+}
+.mic { display: flex; align-items: center; gap: 0.5rem; font: inherit; font-weight: 700; cursor: pointer; background: var(--navy-700); color: var(--white); border: 0; border-radius: 999px; padding: 0.55rem 1rem; white-space: nowrap; }
+.mic-dot { width: 12px; height: 12px; border-radius: 50%; background: #7d8799; }
+.mic[aria-pressed=&quot;true&quot;] { background: var(--gold-500); color: var(--navy-900); }
+.mic[aria-pressed=&quot;true&quot;] .mic-dot { background: var(--danger); animation: pulse 1.2s infinite; }
+.heard { flex: 1; margin: 0; font-size: 0.95rem; color: #c7d0e0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.command-form input { font: inherit; border-radius: 999px; border: 0; padding: 0.5rem 0.9rem; width: 13rem; background: var(--navy-800); color: var(--white); }
+.command-form input::placeholder { color: #9aa5b8; }
+.voice-dock .btn-ghost { color: var(--white); border-color: rgba(255,255,255,0.25); }
+
+.toast { position: fixed; top: 5rem; left: 50%; transform: translateX(-50%); background: var(--gold-500); color: var(--navy-900); font-weight: 700; padding: 0.7rem 1.3rem; border-radius: 999px; box-shadow: var(--shadow); z-index: 20; }
+
+/* Dialogs */
+dialog { border: 0; border-radius: var(--radius); padding: 1.75rem; width: min(560px, calc(100% - 2rem)); box-shadow: 0 20px 50px rgba(11,26,51,0.3); color: var(--ink); }
+dialog::backdrop { background: rgba(11,26,51,0.55); }
+.field { display: block; border: 0; padding: 0; margin: 0 0 1.25rem; }
+.field &gt; span, legend { display: block; font-weight: 700; margin-bottom: 0.4rem; color: var(--navy-900); }
+.field input:not([type]) , .field input[name=&quot;name&quot;] { width: 100%; font: inherit; padding: 0.6rem 0.8rem; border: 1.5px solid var(--navy-100); border-radius: 8px; }
+.choice { display: flex; gap: 0.5rem; align-items: center; padding: 0.25rem 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip { display: inline-flex; gap: 0.4rem; align-items: center; padding: 0.35rem 0.8rem; border: 1.5px solid var(--navy-100); border-radius: 999px; cursor: pointer; }
+.chip:has(input:checked) { border-color: var(--gold-500); background: var(--gold-100); }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem; }
+.commands { display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1.25rem; margin: 1rem 0; }
+.commands dt { font-weight: 700; color: var(--navy-800); }
+.commands dd { margin: 0; color: var(--muted); }
+
+.footer { text-align: center; font-size: 0.9rem; padding: 2rem 1rem; border-top: 1px solid var(--navy-100); margin-top: 3rem; }
+.footer p { margin: 0.2rem 0; }
+
+/* Hands-free mode: larger type and targets for messy hands at a distance */
+body.hands-free { --step-size: clamp(2rem, 4.5vw, 3rem); font-size: 1.15rem; }
+body.hands-free .btn { padding: 0.9rem 1.5rem; font-size: 1.1rem; }
+body.hands-free .tip p { font-size: 1.25rem; }
+body.hands-free .timer-time { font-size: 2rem; }
+
+@media (max-width: 860px) {
+  .overview, .cook-layout { grid-template-columns: 1fr; }
+  .command-form { display: none; }
+  .voice-dock { border-radius: 18px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;a class=&quot;skip-link&quot; href=&quot;#main&quot;&gt;Skip to content&lt;/a&gt;
+
+  &lt;header class=&quot;topbar&quot;&gt;
+    &lt;button class=&quot;brand&quot; data-nav=&quot;library&quot; aria-label=&quot;Back to recipe library&quot;&gt;
+      &lt;span class=&quot;brand-mark&quot; aria-hidden=&quot;true&quot;&gt;&amp;#x2726;&lt;/span&gt;
+      &lt;span class=&quot;brand-name&quot;&gt;[Product Name]&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;div class=&quot;topbar-actions&quot;&gt;
+      &lt;button class=&quot;btn btn-ghost&quot; id=&quot;handsFreeToggle&quot; aria-pressed=&quot;false&quot; title=&quot;Large type, always-on microphone, screen stays awake&quot;&gt;
+        Hands-free
+      &lt;/button&gt;
+      &lt;button class=&quot;btn btn-ghost&quot; id=&quot;profileOpen&quot;&gt;My kitchen&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/header&gt;
+
+  &lt;main id=&quot;main&quot;&gt;
+    &lt;!-- Library view --&gt;
+    &lt;section id=&quot;view-library&quot; class=&quot;view&quot; aria-labelledby=&quot;libraryHeading&quot;&gt;
+      &lt;div class=&quot;hero&quot;&gt;
+        &lt;p class=&quot;eyebrow&quot; id=&quot;greeting&quot;&gt;Welcome to the kitchen&lt;/p&gt;
+        &lt;h1 id=&quot;libraryHeading&quot;&gt;What are we cooking today?&lt;/h1&gt;
+        &lt;p class=&quot;lede&quot;&gt;Choose a recipe and the assistant walks you through every step. Speak a command, watch a technique, or ask for a tip whenever you need one.&lt;/p&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;recipe-grid&quot; id=&quot;recipeGrid&quot;&gt;&lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- Recipe overview --&gt;
+    &lt;section id=&quot;view-overview&quot; class=&quot;view&quot; hidden aria-labelledby=&quot;overviewTitle&quot;&gt;
+      &lt;button class=&quot;btn btn-link&quot; data-nav=&quot;library&quot;&gt;&amp;#x2190; All recipes&lt;/button&gt;
+      &lt;div class=&quot;overview&quot;&gt;
+        &lt;div class=&quot;overview-main&quot;&gt;
+          &lt;p class=&quot;eyebrow&quot; id=&quot;overviewMeta&quot;&gt;&lt;/p&gt;
+          &lt;h1 id=&quot;overviewTitle&quot;&gt;&lt;/h1&gt;
+          &lt;p class=&quot;lede&quot; id=&quot;overviewSummary&quot;&gt;&lt;/p&gt;
+          &lt;div class=&quot;profile-notes&quot; id=&quot;profileNotes&quot; hidden&gt;&lt;/div&gt;
+          &lt;button class=&quot;btn btn-primary btn-lg&quot; id=&quot;startCooking&quot;&gt;Start cooking&lt;/button&gt;
+        &lt;/div&gt;
+        &lt;aside class=&quot;card ingredients-card&quot; aria-labelledby=&quot;ingredientsHeading&quot;&gt;
+          &lt;div class=&quot;ingredients-head&quot;&gt;
+            &lt;h2 id=&quot;ingredientsHeading&quot;&gt;Ingredients&lt;/h2&gt;
+            &lt;div class=&quot;scaler&quot; role=&quot;group&quot; aria-label=&quot;Servings&quot;&gt;
+              &lt;button class=&quot;btn btn-icon&quot; id=&quot;servingsDown&quot; aria-label=&quot;Fewer servings&quot;&gt;&amp;#x2212;&lt;/button&gt;
+              &lt;span&gt;&lt;strong id=&quot;servingsValue&quot;&gt;4&lt;/strong&gt; servings&lt;/span&gt;
+              &lt;button class=&quot;btn btn-icon&quot; id=&quot;servingsUp&quot; aria-label=&quot;More servings&quot;&gt;+&lt;/button&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+          &lt;ul class=&quot;ingredient-list&quot; id=&quot;ingredientList&quot;&gt;&lt;/ul&gt;
+        &lt;/aside&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+
+    &lt;!-- Cook mode --&gt;
+    &lt;section id=&quot;view-cook&quot; class=&quot;view&quot; hidden aria-labelledby=&quot;cookTitle&quot;&gt;
+      &lt;div class=&quot;cook-head&quot;&gt;
+        &lt;button class=&quot;btn btn-link&quot; id=&quot;exitCook&quot;&gt;&amp;#x2190; Overview&lt;/button&gt;
+        &lt;h1 id=&quot;cookTitle&quot; class=&quot;cook-title&quot;&gt;&lt;/h1&gt;
+        &lt;div class=&quot;progress&quot; aria-hidden=&quot;true&quot;&gt;&lt;div class=&quot;progress-bar&quot; id=&quot;progressBar&quot;&gt;&lt;/div&gt;&lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div class=&quot;cook-layout&quot;&gt;
+        &lt;div class=&quot;step-panel card&quot;&gt;
+          &lt;p class=&quot;eyebrow&quot; id=&quot;stepCount&quot;&gt;&lt;/p&gt;
+          &lt;p class=&quot;step-text&quot; id=&quot;stepText&quot; aria-live=&quot;polite&quot;&gt;&lt;/p&gt;
+
+          &lt;div class=&quot;tip&quot; id=&quot;tipBox&quot; hidden&gt;
+            &lt;span class=&quot;tip-label&quot;&gt;Tip for you&lt;/span&gt;
+            &lt;p id=&quot;tipText&quot;&gt;&lt;/p&gt;
+          &lt;/div&gt;
+
+          &lt;div class=&quot;step-actions&quot;&gt;
+            &lt;button class=&quot;btn btn-secondary&quot; id=&quot;prevStep&quot;&gt;Back&lt;/button&gt;
+            &lt;button class=&quot;btn btn-ghost&quot; id=&quot;repeatStep&quot;&gt;Read aloud&lt;/button&gt;
+            &lt;button class=&quot;btn btn-ghost&quot; id=&quot;tipStep&quot;&gt;Tip&lt;/button&gt;
+            &lt;button class=&quot;btn btn-ghost&quot; id=&quot;timerStep&quot; hidden&gt;Start timer&lt;/button&gt;
+            &lt;button class=&quot;btn btn-primary&quot; id=&quot;nextStep&quot;&gt;Next&lt;/button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+
+        &lt;div class=&quot;side-panel&quot;&gt;
+          &lt;div class=&quot;card video-card&quot;&gt;
+            &lt;div class=&quot;video-frame&quot; id=&quot;videoFrame&quot;&gt;&lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;div class=&quot;card timers-card&quot; id=&quot;timersCard&quot; hidden&gt;
+            &lt;h2&gt;Timers&lt;/h2&gt;
+            &lt;ul class=&quot;timer-list&quot; id=&quot;timerList&quot;&gt;&lt;/ul&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/section&gt;
+  &lt;/main&gt;
+
+  &lt;!-- Voice dock, shown in cook mode --&gt;
+  &lt;div class=&quot;voice-dock&quot; id=&quot;voiceDock&quot; hidden&gt;
+    &lt;button class=&quot;mic&quot; id=&quot;micToggle&quot; aria-pressed=&quot;false&quot; aria-label=&quot;Turn voice commands on&quot;&gt;
+      &lt;span class=&quot;mic-dot&quot; aria-hidden=&quot;true&quot;&gt;&lt;/span&gt;
+      &lt;span id=&quot;micLabel&quot;&gt;Voice off&lt;/span&gt;
+    &lt;/button&gt;
+    &lt;p class=&quot;heard&quot; id=&quot;heard&quot; aria-live=&quot;polite&quot;&gt;Say &amp;#x201c;next&amp;#x201d;, &amp;#x201c;repeat&amp;#x201d;, or &amp;#x201c;help&amp;#x201d;.&lt;/p&gt;
+    &lt;form class=&quot;command-form&quot; id=&quot;commandForm&quot; autocomplete=&quot;off&quot;&gt;
+      &lt;label class=&quot;sr-only&quot; for=&quot;commandInput&quot;&gt;Type a command&lt;/label&gt;
+      &lt;input id=&quot;commandInput&quot; placeholder=&quot;Or type a command&quot; /&gt;
+    &lt;/form&gt;
+    &lt;button class=&quot;btn btn-ghost btn-sm&quot; id=&quot;helpOpen&quot;&gt;Commands&lt;/button&gt;
+  &lt;/div&gt;
+
+  &lt;div class=&quot;toast&quot; id=&quot;toast&quot; role=&quot;status&quot; aria-live=&quot;polite&quot; hidden&gt;&lt;/div&gt;
+
+  &lt;!-- Profile dialog --&gt;
+  &lt;dialog id=&quot;profileDialog&quot; aria-labelledby=&quot;profileHeading&quot;&gt;
+    &lt;form method=&quot;dialog&quot; id=&quot;profileForm&quot;&gt;
+      &lt;h2 id=&quot;profileHeading&quot;&gt;My kitchen&lt;/h2&gt;
+      &lt;p class=&quot;muted&quot;&gt;Your answers shape the tips and flag ingredients to watch. They stay in this browser.&lt;/p&gt;
+
+      &lt;label class=&quot;field&quot;&gt;
+        &lt;span&gt;First name&lt;/span&gt;
+        &lt;input name=&quot;name&quot; placeholder=&quot;Optional&quot;&gt;
+      &lt;/label&gt;
+
+      &lt;fieldset class=&quot;field&quot;&gt;
+        &lt;legend&gt;How comfortable are you in the kitchen?&lt;/legend&gt;
+        &lt;label class=&quot;choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;skill&quot; value=&quot;beginner&quot;&gt; Just starting out&lt;/label&gt;
+        &lt;label class=&quot;choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;skill&quot; value=&quot;intermediate&quot;&gt; Comfortable with the basics&lt;/label&gt;
+        &lt;label class=&quot;choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;skill&quot; value=&quot;confident&quot;&gt; Confident and curious&lt;/label&gt;
+      &lt;/fieldset&gt;
+
+      &lt;fieldset class=&quot;field&quot;&gt;
+        &lt;legend&gt;Dietary preferences&lt;/legend&gt;
+        &lt;div class=&quot;chips&quot;&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;diet&quot; value=&quot;vegetarian&quot;&gt; Vegetarian&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;diet&quot; value=&quot;vegan&quot;&gt; Vegan&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;diet&quot; value=&quot;gluten-free&quot;&gt; Gluten-free&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;diet&quot; value=&quot;dairy-free&quot;&gt; Dairy-free&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/fieldset&gt;
+
+      &lt;fieldset class=&quot;field&quot;&gt;
+        &lt;legend&gt;Allergies&lt;/legend&gt;
+        &lt;div class=&quot;chips&quot;&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;allergy&quot; value=&quot;dairy&quot;&gt; Dairy&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;allergy&quot; value=&quot;eggs&quot;&gt; Eggs&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;allergy&quot; value=&quot;gluten&quot;&gt; Gluten&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;allergy&quot; value=&quot;nuts&quot;&gt; Tree nuts and peanuts&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;allergy&quot; value=&quot;fish&quot;&gt; Fish&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;allergy&quot; value=&quot;shellfish&quot;&gt; Shellfish&lt;/label&gt;
+          &lt;label class=&quot;chip&quot;&gt;&lt;input type=&quot;checkbox&quot; name=&quot;allergy&quot; value=&quot;soy&quot;&gt; Soy&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/fieldset&gt;
+
+      &lt;label class=&quot;choice&quot;&gt;
+        &lt;input type=&quot;checkbox&quot; name=&quot;speak&quot; checked&gt; Read each step aloud
+      &lt;/label&gt;
+
+      &lt;div class=&quot;dialog-actions&quot;&gt;
+        &lt;button class=&quot;btn btn-secondary&quot; value=&quot;cancel&quot; formnovalidate&gt;Cancel&lt;/button&gt;
+        &lt;button class=&quot;btn btn-primary&quot; value=&quot;save&quot; id=&quot;profileSave&quot;&gt;Save&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/form&gt;
+  &lt;/dialog&gt;
+
+  &lt;!-- Help dialog --&gt;
+  &lt;dialog id=&quot;helpDialog&quot; aria-labelledby=&quot;helpHeading&quot;&gt;
+    &lt;h2 id=&quot;helpHeading&quot;&gt;Voice commands&lt;/h2&gt;
+    &lt;p class=&quot;muted&quot;&gt;Speak naturally. The assistant listens for these phrases.&lt;/p&gt;
+    &lt;dl class=&quot;commands&quot;&gt;
+      &lt;dt&gt;&amp;#x201c;Next&amp;#x201d; / &amp;#x201c;Back&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Move between steps&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Repeat&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Hear the current step again&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Tip&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Get advice matched to your skill level&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Start timer&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Start the step&amp;#x2019;s timer, or say &amp;#x201c;set a timer for 5 minutes&amp;#x201d;&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Stop timer&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Cancel the most recent timer&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;How much garlic?&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Hear the scaled amount of any ingredient&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Ingredients&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Hear the full list&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Play video&amp;#x201d; / &amp;#x201c;Pause video&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Control the demonstration&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Go to step 3&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Jump to any step&lt;/dd&gt;
+      &lt;dt&gt;&amp;#x201c;Stop talking&amp;#x201d;&lt;/dt&gt;&lt;dd&gt;Silence the assistant&lt;/dd&gt;
+    &lt;/dl&gt;
+    &lt;form method=&quot;dialog&quot; class=&quot;dialog-actions&quot;&gt;
+      &lt;button class=&quot;btn btn-primary&quot;&gt;Got it&lt;/button&gt;
+    &lt;/form&gt;
+  &lt;/dialog&gt;
+
+  &lt;footer class=&quot;footer&quot;&gt;
+    &lt;p&gt;[Product Name] &amp;#xb7; [Organization Name] &amp;#xb7; [contact@email.com] &amp;#xb7; [City, State]&lt;/p&gt;
+    &lt;p class=&quot;muted&quot;&gt;Prototype. Always check labels for allergens.&lt;/p&gt;
+  &lt;/footer&gt;
+
+  &lt;script&gt;
+/*
+ * Recipe library for the prototype.
+ *
+ * Each recipe is plain data, so swapping in your own content means editing
+ * this file only. Field guide:
+ *   baseServings  number the quantities below are written for
+ *   ingredients   qty (number or null), unit, item, allergens[], diet[] flags
+ *                 the ingredient conflicts with, and an optional swap
+ *   steps         text, optional timer (seconds), optional video (URL or
+ *                 null for the placeholder panel), and tips keyed by skill
+ *                 level: beginner, intermediate, confident, plus &quot;all&quot;
+ *
+ * Allergen keys: dairy, eggs, gluten, nuts, shellfish, soy, fish
+ * Diet keys:     vegetarian, vegan, gluten-free, dairy-free
+ */
+window.RECIPES = [
+  {
+    id: &quot;black-bean-tacos&quot;,
+    title: &quot;Smoky Black Bean Tacos&quot;,
+    summary: &quot;A weeknight favorite with crisp-edged beans, quick-pickled onions, and lime crema.&quot;,
+    time: 30,
+    difficulty: &quot;Easy&quot;,
+    baseServings: 4,
+    tags: [&quot;vegetarian&quot;, &quot;weeknight&quot;],
+    ingredients: [
+      { qty: 2, unit: &quot;cans&quot;, item: &quot;black beans, drained and rinsed&quot; },
+      { qty: 1, unit: &quot;&quot;, item: &quot;red onion, thinly sliced&quot; },
+      { qty: 0.5, unit: &quot;cup&quot;, item: &quot;lime juice, divided&quot; },
+      { qty: 1, unit: &quot;tbsp&quot;, item: &quot;olive oil&quot; },
+      { qty: 2, unit: &quot;tsp&quot;, item: &quot;smoked paprika&quot; },
+      { qty: 1, unit: &quot;tsp&quot;, item: &quot;ground cumin&quot; },
+      { qty: 0.5, unit: &quot;cup&quot;, item: &quot;sour cream&quot;, allergens: [&quot;dairy&quot;], diet: [&quot;vegan&quot;, &quot;dairy-free&quot;], swap: &quot;unsweetened plant yogurt&quot; },
+      { qty: 8, unit: &quot;&quot;, item: &quot;corn tortillas&quot; },
+      { qty: 0.5, unit: &quot;cup&quot;, item: &quot;crumbled cotija&quot;, allergens: [&quot;dairy&quot;], diet: [&quot;vegan&quot;, &quot;dairy-free&quot;], swap: &quot;toasted pepitas&quot; },
+      { qty: null, unit: &quot;&quot;, item: &quot;cilantro and salt, to taste&quot; }
+    ],
+    steps: [
+      {
+        text: &quot;Toss the sliced onion with half the lime juice and a pinch of salt. Set it aside to quick-pickle while you cook.&quot;,
+        video: null,
+        tips: {
+          beginner: &quot;Slice the onion as thin as you can. Thinner slices pickle faster and taste milder.&quot;,
+          confident: &quot;Add a splash of the pickling liquid to the crema later for a brighter finish.&quot;
+        }
+      },
+      {
+        text: &quot;Heat the olive oil in a large skillet over medium-high heat. Add the beans, paprika, and cumin.&quot;,
+        video: null,
+        tips: {
+          beginner: &quot;The oil is ready when it shimmers. If it smokes, pull the pan off the heat for a moment.&quot;,
+          all: &quot;Pat the beans dry first. Dry beans crisp; wet beans steam.&quot;
+        }
+      },
+      {
+        text: &quot;Cook the beans without stirring for four minutes, until the bottoms crisp. Then stir and lightly mash about a third of them.&quot;,
+        timer: 240,
+        video: null,
+        tips: {
+          beginner: &quot;Resist the urge to stir. Patience gives you the crispy edges.&quot;,
+          intermediate: &quot;Mashing part of the beans gives the filling body so it stays in the tortilla.&quot;
+        }
+      },
+      {
+        text: &quot;Whisk the sour cream with the remaining lime juice and a pinch of salt to make the crema.&quot;,
+        video: null,
+        tips: { all: &quot;Thin the crema with a teaspoon of water if you want it to drizzle.&quot; }
+      },
+      {
+        text: &quot;Warm the tortillas in a dry pan for about thirty seconds per side, then wrap them in a towel to keep them soft.&quot;,
+        timer: 60,
+        video: null,
+        tips: {
+          beginner: &quot;A little char is a good sign. Stack and wrap them as you go.&quot;,
+          confident: &quot;Hold each tortilla over a gas flame with tongs for a few seconds for smoky blistering.&quot;
+        }
+      },
+      {
+        text: &quot;Fill each tortilla with beans, pickled onion, crema, cotija, and cilantro. Serve right away.&quot;,
+        video: null,
+        tips: { all: &quot;Set everything out and let guests build their own. Hosting gets easier when the table does the work.&quot; }
+      }
+    ]
+  },
+  {
+    id: &quot;lemon-garlic-salmon&quot;,
+    title: &quot;One-Pan Lemon Garlic Salmon&quot;,
+    summary: &quot;Tender salmon and roasted green beans on a single sheet pan, finished with garlic butter.&quot;,
+    time: 25,
+    difficulty: &quot;Easy&quot;,
+    baseServings: 2,
+    tags: [&quot;gluten-free&quot;, &quot;one-pan&quot;],
+    ingredients: [
+      { qty: 2, unit: &quot;&quot;, item: &quot;salmon fillets (6 oz each)&quot;, allergens: [&quot;fish&quot;], diet: [&quot;vegetarian&quot;, &quot;vegan&quot;] },
+      { qty: 8, unit: &quot;oz&quot;, item: &quot;green beans, trimmed&quot; },
+      { qty: 1, unit: &quot;tbsp&quot;, item: &quot;olive oil&quot; },
+      { qty: 2, unit: &quot;tbsp&quot;, item: &quot;butter, melted&quot;, allergens: [&quot;dairy&quot;], diet: [&quot;vegan&quot;, &quot;dairy-free&quot;], swap: &quot;more olive oil&quot; },
+      { qty: 3, unit: &quot;cloves&quot;, item: &quot;garlic, minced&quot; },
+      { qty: 1, unit: &quot;&quot;, item: &quot;lemon, half juiced and half sliced&quot; },
+      { qty: null, unit: &quot;&quot;, item: &quot;salt, pepper, and parsley, to taste&quot; }
+    ],
+    steps: [
+      {
+        text: &quot;Heat the oven to 400 degrees Fahrenheit and line a sheet pan with parchment.&quot;,
+        video: null,
+        tips: { beginner: &quot;Give the oven a full ten minutes to heat. An under-heated oven gives pale, soggy results.&quot; }
+      },
+      {
+        text: &quot;Toss the green beans with olive oil, salt, and pepper. Spread them on one side of the pan and roast for five minutes.&quot;,
+        timer: 300,
+        video: null,
+        tips: { all: &quot;Spread the beans in a single layer so they roast instead of steam.&quot; }
+      },
+      {
+        text: &quot;Stir together the melted butter, garlic, and lemon juice while the beans roast.&quot;,
+        video: null,
+        tips: { intermediate: &quot;Grate the garlic on a microplane so it melts into the butter.&quot; }
+      },
+      {
+        text: &quot;Pat the salmon dry, season it, and set it on the empty side of the pan. Spoon the garlic butter over the top and lay the lemon slices on it.&quot;,
+        video: null,
+        tips: {
+          beginner: &quot;Skin side down. The skin protects the fish from overcooking.&quot;,
+          all: &quot;Dry fish takes seasoning better and browns more evenly.&quot;
+        }
+      },
+      {
+        text: &quot;Roast for twelve minutes, until the salmon flakes easily with a fork.&quot;,
+        timer: 720,
+        video: null,
+        tips: {
+          beginner: &quot;Press gently with a fork at the thickest point. If it flakes, it is done.&quot;,
+          confident: &quot;Pull it at 125 degrees for a silky center; carryover heat finishes the job.&quot;
+        }
+      },
+      {
+        text: &quot;Finish with parsley and a squeeze of lemon. Serve straight from the pan.&quot;,
+        video: null,
+        tips: { all: &quot;Spoon the pan juices over the beans before serving.&quot; }
+      }
+    ]
+  },
+  {
+    id: &quot;buttermilk-biscuits&quot;,
+    title: &quot;Sunday Buttermilk Biscuits&quot;,
+    summary: &quot;Tall, flaky biscuits built on cold butter and a gentle fold.&quot;,
+    time: 40,
+    difficulty: &quot;Medium&quot;,
+    baseServings: 8,
+    tags: [&quot;baking&quot;, &quot;vegetarian&quot;],
+    ingredients: [
+      { qty: 2.5, unit: &quot;cups&quot;, item: &quot;all-purpose flour&quot;, allergens: [&quot;gluten&quot;], diet: [&quot;gluten-free&quot;], swap: &quot;a 1:1 gluten-free baking blend&quot; },
+      { qty: 1, unit: &quot;tbsp&quot;, item: &quot;baking powder&quot; },
+      { qty: 0.5, unit: &quot;tsp&quot;, item: &quot;baking soda&quot; },
+      { qty: 1, unit: &quot;tsp&quot;, item: &quot;salt&quot; },
+      { qty: 0.5, unit: &quot;cup&quot;, item: &quot;cold butter, cubed&quot;, allergens: [&quot;dairy&quot;], diet: [&quot;vegan&quot;, &quot;dairy-free&quot;], swap: &quot;cold vegan butter sticks&quot; },
+      { qty: 1, unit: &quot;cup&quot;, item: &quot;cold buttermilk&quot;, allergens: [&quot;dairy&quot;], diet: [&quot;vegan&quot;, &quot;dairy-free&quot;], swap: &quot;oat milk with 1 tbsp lemon juice&quot; },
+      { qty: 1, unit: &quot;&quot;, item: &quot;egg, beaten, for brushing&quot;, allergens: [&quot;eggs&quot;], diet: [&quot;vegan&quot;], swap: &quot;a brush of plant milk&quot; }
+    ],
+    steps: [
+      {
+        text: &quot;Heat the oven to 425 degrees Fahrenheit and line a baking sheet with parchment.&quot;,
+        video: null,
+        tips: { all: &quot;A hot oven makes the butter release steam fast, which lifts the layers.&quot; }
+      },
+      {
+        text: &quot;Whisk the flour, baking powder, baking soda, and salt in a large bowl.&quot;,
+        video: null,
+        tips: { beginner: &quot;Spoon flour into the cup and level it. Scooping packs it and makes dry biscuits.&quot; }
+      },
+      {
+        text: &quot;Cut the cold butter into the flour until the pieces are the size of small peas.&quot;,
+        video: null,
+        tips: {
+          beginner: &quot;Work quickly with your fingertips or a pastry cutter. Warm hands melt the butter.&quot;,
+          confident: &quot;Freeze the butter and grate it straight into the flour for even flakes.&quot;
+        }
+      },
+      {
+        text: &quot;Pour in the buttermilk and stir just until a shaggy dough forms.&quot;,
+        video: null,
+        tips: { all: &quot;Stop while it still looks a little rough. Overmixing makes tough biscuits.&quot; }
+      },
+      {
+        text: &quot;Turn the dough out, pat it into a rectangle, and fold it in thirds like a letter. Repeat the pat and fold three times.&quot;,
+        video: null,
+        tips: {
+          beginner: &quot;Flour your hands, not the dough. Too much extra flour dries it out.&quot;,
+          intermediate: &quot;Each fold stacks the butter into layers. Four folds is the sweet spot.&quot;
+        }
+      },
+      {
+        text: &quot;Pat the dough one inch thick and cut straight down with a floured cutter. Set the biscuits on the sheet so they touch.&quot;,
+        video: null,
+        tips: { all: &quot;Press straight down without twisting. A twist seals the edges and stops the rise.&quot; }
+      },
+      {
+        text: &quot;Brush the tops with egg and bake for fifteen minutes, until tall and golden.&quot;,
+        timer: 900,
+        video: null,
+        tips: { beginner: &quot;Peek through the oven window instead of opening the door. Each opening drops the heat.&quot; }
+      }
+    ]
+  }
+];
+
+&lt;/script&gt;
+  &lt;script&gt;
+/*
+ * Interactive Cooking Assistant prototype.
+ * No build step and no dependencies. Voice uses the browser&#x27;s Web Speech API,
+ * so recognition works best in Chrome and Edge. Every voice command also has
+ * an on-screen button or can be typed into the command box.
+ */
+(function () {
+  &quot;use strict&quot;;
+
+  const STORAGE_KEY = &quot;cookingAssistant.profile&quot;;
+  const HANDS_FREE_KEY = &quot;cookingAssistant.handsFree&quot;;
+
+  const DEFAULT_PROFILE = { name: &quot;&quot;, skill: &quot;beginner&quot;, diet: [], allergy: [], speak: true };
+
+  const state = {
+    profile: loadProfile(),
+    recipe: null,
+    servings: 4,
+    step: 0,
+    timers: [],
+    listening: false,
+    handsFree: localStorage.getItem(HANDS_FREE_KEY) === &quot;1&quot;,
+    wakeLock: null
+  };
+
+  const $ = (id) =&gt; document.getElementById(id);
+
+  // ---------- Profile ----------
+  function loadProfile() {
+    try {
+      return Object.assign({}, DEFAULT_PROFILE, JSON.parse(localStorage.getItem(STORAGE_KEY)) || {});
+    } catch (_) {
+      return Object.assign({}, DEFAULT_PROFILE);
+    }
+  }
+
+  function saveProfile(p) {
+    state.profile = p;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  }
+
+  function openProfile() {
+    const form = $(&quot;profileForm&quot;);
+    const p = state.profile;
+    form.name.value = p.name;
+    form.querySelectorAll(&#x27;[name=&quot;skill&quot;]&#x27;).forEach((el) =&gt; (el.checked = el.value === p.skill));
+    form.querySelectorAll(&#x27;[name=&quot;diet&quot;]&#x27;).forEach((el) =&gt; (el.checked = p.diet.includes(el.value)));
+    form.querySelectorAll(&#x27;[name=&quot;allergy&quot;]&#x27;).forEach((el) =&gt; (el.checked = p.allergy.includes(el.value)));
+    form.speak.checked = p.speak;
+    $(&quot;profileDialog&quot;).showModal();
+  }
+
+  function readProfileForm() {
+    const form = $(&quot;profileForm&quot;);
+    const checked = (name) =&gt; [...form.querySelectorAll(`[name=&quot;${name}&quot;]:checked`)].map((el) =&gt; el.value);
+    return {
+      name: form.name.value.trim(),
+      skill: (checked(&quot;skill&quot;)[0]) || &quot;beginner&quot;,
+      diet: checked(&quot;diet&quot;),
+      allergy: checked(&quot;allergy&quot;),
+      speak: form.speak.checked
+    };
+  }
+
+  /** Returns the reasons an ingredient conflicts with the cook&#x27;s profile. */
+  function conflictsFor(ing) {
+    const p = state.profile;
+    const reasons = [];
+    (ing.allergens || []).forEach((a) =&gt; { if (p.allergy.includes(a)) reasons.push(`${a} allergy`); });
+    (ing.diet || []).forEach((d) =&gt; { if (p.diet.includes(d)) reasons.push(`not ${d}`); });
+    return reasons;
+  }
+
+  // ---------- Formatting ----------
+  const FRACTIONS = [[0, &quot;&quot;], [0.25, &quot;\u00bc&quot;], [0.333, &quot;\u2153&quot;], [0.5, &quot;\u00bd&quot;], [0.667, &quot;\u2154&quot;], [0.75, &quot;\u00be&quot;], [1, &quot;&quot;]];
+  const SPOKEN_FRACTIONS = { &quot;\u00bc&quot;: &quot;a quarter&quot;, &quot;\u2153&quot;: &quot;a third&quot;, &quot;\u00bd&quot;: &quot;a half&quot;, &quot;\u2154&quot;: &quot;two thirds&quot;, &quot;\u00be&quot;: &quot;three quarters&quot; };
+
+  function formatQty(n) {
+    if (n == null) return &quot;&quot;;
+    let whole = Math.floor(n);
+    const rest = n - whole;
+    let best = FRACTIONS[0];
+    FRACTIONS.forEach((f) =&gt; { if (Math.abs(f[0] - rest) &lt; Math.abs(best[0] - rest)) best = f; });
+    if (best[0] === 1) { whole += 1; best = FRACTIONS[0]; }
+    if (whole === 0 &amp;&amp; !best[1]) return &quot;a pinch of&quot;;
+    return `${whole || &quot;&quot;}${best[1]}`;
+  }
+
+  function spokenQty(n) {
+    const text = formatQty(n);
+    return text.replace(/(\d*)([\u00bc\u2153\u00bd\u2154\u00be])/, (_, w, f) =&gt; (w ? `${w} and ${SPOKEN_FRACTIONS[f]}` : SPOKEN_FRACTIONS[f]));
+  }
+
+  // Items counted whole (eggs, fillets, cans, cloves) round to a whole number.
+  const COUNT_UNITS = [&quot;&quot;, &quot;cans&quot;, &quot;cloves&quot;];
+
+  function scaled(ing) {
+    if (ing.qty == null) return null;
+    const q = (ing.qty * state.servings) / state.recipe.baseServings;
+    return COUNT_UNITS.includes(ing.unit) ? Math.max(1, Math.round(q)) : q;
+  }
+
+  function ingredientLine(ing, spoken) {
+    const q = scaled(ing);
+    if (q == null) return ing.item;
+    const qty = spoken ? spokenQty(q) : formatQty(q);
+    return [qty, ing.unit, ing.item].filter(Boolean).join(&quot; &quot;);
+  }
+
+  function formatTime(sec) {
+    const m = Math.floor(sec / 60);
+    const s = Math.floor(sec % 60);
+    return `${m}:${String(s).padStart(2, &quot;0&quot;)}`;
+  }
+
+  function spokenDuration(sec) {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    const parts = [];
+    if (m) parts.push(`${m} minute${m === 1 ? &quot;&quot; : &quot;s&quot;}`);
+    if (s) parts.push(`${s} second${s === 1 ? &quot;&quot; : &quot;s&quot;}`);
+    return parts.join(&quot; and &quot;);
+  }
+
+  // ---------- Speech output ----------
+  function speak(text, force) {
+    if (!(&quot;speechSynthesis&quot; in window)) return;
+    if (!force &amp;&amp; !state.profile.speak) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.rate = 0.95;
+    window.speechSynthesis.speak(u);
+  }
+
+  function hush() {
+    if (&quot;speechSynthesis&quot; in window) window.speechSynthesis.cancel();
+  }
+
+  let toastTimer;
+  function toast(msg) {
+    const el = $(&quot;toast&quot;);
+    el.textContent = msg;
+    el.hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() =&gt; (el.hidden = true), 2600);
+  }
+
+  // ---------- Views ----------
+  function show(view) {
+    [&quot;library&quot;, &quot;overview&quot;, &quot;cook&quot;].forEach((v) =&gt; ($(`view-${v}`).hidden = v !== view));
+    $(&quot;voiceDock&quot;).hidden = view !== &quot;cook&quot;;
+    if (view !== &quot;cook&quot;) { stopListening(); hush(); }
+    window.scrollTo(0, 0);
+  }
+
+  function renderLibrary() {
+    const p = state.profile;
+    $(&quot;greeting&quot;).textContent = p.name ? `Welcome back, ${p.name}` : &quot;Welcome to the kitchen&quot;;
+    $(&quot;recipeGrid&quot;).innerHTML = window.RECIPES.map((r) =&gt; {
+      const flagged = r.ingredients.filter((i) =&gt; conflictsFor(i).length).length;
+      return `
+        &lt;button class=&quot;card recipe-card&quot; data-recipe=&quot;${r.id}&quot;&gt;
+          &lt;p class=&quot;eyebrow&quot;&gt;${r.difficulty} \u00b7 ${r.time} min&lt;/p&gt;
+          &lt;h2&gt;${r.title}&lt;/h2&gt;
+          &lt;p&gt;${r.summary}&lt;/p&gt;
+          &lt;div class=&quot;meta-row&quot;&gt;
+            ${r.tags.map((t) =&gt; `&lt;span class=&quot;pill&quot;&gt;${t}&lt;/span&gt;`).join(&quot;&quot;)}
+            ${flagged ? `&lt;span class=&quot;pill pill-warn&quot;&gt;${flagged} to swap for you&lt;/span&gt;` : &quot;&quot;}
+          &lt;/div&gt;
+        &lt;/button&gt;`;
+    }).join(&quot;&quot;);
+  }
+
+  function openRecipe(id) {
+    const r = window.RECIPES.find((x) =&gt; x.id === id);
+    if (!r) { location.hash = &quot;&quot;; return; }
+    if (!state.recipe || state.recipe.id !== r.id) {
+      state.recipe = r;
+      state.servings = r.baseServings;
+      state.step = 0;
+    }
+    renderOverview();
+    show(&quot;overview&quot;);
+  }
+
+  function renderOverview() {
+    const r = state.recipe;
+    $(&quot;overviewMeta&quot;).textContent = `${r.difficulty} \u00b7 ${r.time} minutes \u00b7 ${r.steps.length} steps`;
+    $(&quot;overviewTitle&quot;).textContent = r.title;
+    $(&quot;overviewSummary&quot;).textContent = r.summary;
+    $(&quot;servingsValue&quot;).textContent = state.servings;
+    $(&quot;servingsDown&quot;).disabled = state.servings &lt;= 1;
+
+    $(&quot;ingredientList&quot;).innerHTML = r.ingredients.map((ing) =&gt; {
+      const reasons = conflictsFor(ing);
+      const q = scaled(ing);
+      const qty = q == null ? &quot;&quot; : `&lt;span class=&quot;qty&quot;&gt;${formatQty(q)}${ing.unit ? &quot; &quot; + ing.unit : &quot;&quot;}&lt;/span&gt; `;
+      const flag = reasons.length
+        ? `&lt;span class=&quot;flag&quot;&gt;Heads up: ${reasons.join(&quot;, &quot;)}.${ing.swap ? ` Try &lt;em&gt;${ing.swap}&lt;/em&gt;.` : &quot;&quot;}&lt;/span&gt;`
+        : &quot;&quot;;
+      return `&lt;li&gt;${qty}${ing.item}${flag}&lt;/li&gt;`;
+    }).join(&quot;&quot;);
+
+    const flagged = r.ingredients.filter((i) =&gt; conflictsFor(i).length);
+    const notes = $(&quot;profileNotes&quot;);
+    if (flagged.length) {
+      notes.hidden = false;
+      notes.innerHTML = `&lt;p&gt;&lt;strong&gt;Personalized for your kitchen.&lt;/strong&gt; ${flagged.length} ingredient${flagged.length === 1 ? &quot;&quot; : &quot;s&quot;} ${flagged.length === 1 ? &quot;needs&quot; : &quot;need&quot;} a swap based on your profile. Suggestions appear in the list.&lt;/p&gt;`;
+    } else {
+      notes.hidden = true;
+    }
+  }
+
+  function setServings(n) {
+    state.servings = Math.max(1, Math.min(24, n));
+    renderOverview();
+  }
+
+  // ---------- Cook mode ----------
+  function startCooking() {
+    state.step = Math.min(state.step, state.recipe.steps.length - 1);
+    $(&quot;cookTitle&quot;).textContent = state.recipe.title;
+    show(&quot;cook&quot;);
+    renderStep(true);
+    if (state.handsFree) startListening();
+  }
+
+  function currentStep() { return state.recipe.steps[state.step]; }
+
+  function tipFor(step) {
+    const t = step.tips || {};
+    return t[state.profile.skill] || t.all || null;
+  }
+
+  function renderStep(announce) {
+    const r = state.recipe;
+    const step = currentStep();
+    const total = r.steps.length;
+    $(&quot;stepCount&quot;).textContent = `Step ${state.step + 1} of ${total}`;
+    $(&quot;stepText&quot;).textContent = step.text;
+    $(&quot;progressBar&quot;).style.width = `${((state.step + 1) / total) * 100}%`;
+    $(&quot;prevStep&quot;).disabled = state.step === 0;
+    $(&quot;nextStep&quot;).textContent = state.step === total - 1 ? &quot;Finish&quot; : &quot;Next&quot;;
+
+    const tip = tipFor(step);
+    $(&quot;tipStep&quot;).hidden = !tip;
+    $(&quot;tipBox&quot;).hidden = true;
+
+    const timerBtn = $(&quot;timerStep&quot;);
+    timerBtn.hidden = !step.timer;
+    if (step.timer) timerBtn.textContent = `Start ${formatTime(step.timer)} timer`;
+
+    renderVideo(step);
+
+    // Beginners see their tip without asking; others can request it.
+    if (tip &amp;&amp; state.profile.skill === &quot;beginner&quot;) showTip(false);
+
+    if (announce) speak(`Step ${state.step + 1}. ${step.text}`);
+  }
+
+  function showTip(say) {
+    const tip = tipFor(currentStep());
+    if (!tip) { if (say) speak(&quot;No extra tips for this step. You are doing great.&quot;, true); return; }
+    $(&quot;tipText&quot;).textContent = tip;
+    $(&quot;tipBox&quot;).hidden = false;
+    if (say) speak(tip, true);
+  }
+
+  function goTo(i) {
+    const total = state.recipe.steps.length;
+    if (i &gt;= total) { finish(); return; }
+    state.step = Math.max(0, i);
+    renderStep(true);
+  }
+
+  function finish() {
+    const name = state.profile.name ? `, ${state.profile.name}` : &quot;&quot;;
+    speak(`That is everything${name}. Enjoy your ${state.recipe.title}.`, true);
+    toast(&quot;Dinner is served. Enjoy!&quot;);
+    state.step = 0;
+    location.hash = `#/recipe/${state.recipe.id}`;
+  }
+
+  // ---------- Video ----------
+  function youTubeId(url) {
+    const m = url.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+    return m ? m[1] : null;
+  }
+
+  function renderVideo(step) {
+    const frame = $(&quot;videoFrame&quot;);
+    if (!step.video) {
+      frame.innerHTML = `
+        &lt;div class=&quot;video-placeholder&quot;&gt;
+          &lt;div class=&quot;play&quot; aria-hidden=&quot;true&quot;&gt;\u25b6&lt;/div&gt;
+          &lt;p&gt;&lt;strong&gt;Technique video for step ${state.step + 1}&lt;/strong&gt;&lt;/p&gt;
+          &lt;p&gt;A video demonstration for this step is coming soon.&lt;/p&gt;
+        &lt;/div&gt;`;
+      return;
+    }
+    const yt = youTubeId(step.video);
+    if (yt) {
+      frame.innerHTML = `&lt;iframe src=&quot;https://www.youtube-nocookie.com/embed/${yt}?enablejsapi=1&amp;rel=0&quot; title=&quot;Step ${state.step + 1} demonstration&quot; allow=&quot;autoplay; encrypted-media&quot; allowfullscreen&gt;&lt;/iframe&gt;`;
+    } else {
+      frame.innerHTML = `&lt;video src=&quot;${step.video}&quot; controls playsinline preload=&quot;metadata&quot; aria-label=&quot;Step ${state.step + 1} demonstration&quot;&gt;&lt;/video&gt;`;
+    }
+  }
+
+  function controlVideo(action) {
+    const frame = $(&quot;videoFrame&quot;);
+    const video = frame.querySelector(&quot;video&quot;);
+    const iframe = frame.querySelector(&quot;iframe&quot;);
+    if (video) { action === &quot;play&quot; ? video.play() : video.pause(); return true; }
+    if (iframe) {
+      iframe.contentWindow.postMessage(JSON.stringify({ event: &quot;command&quot;, func: action === &quot;play&quot; ? &quot;playVideo&quot; : &quot;pauseVideo&quot;, args: [] }), &quot;*&quot;);
+      return true;
+    }
+    toast(&quot;No video for this step yet&quot;);
+    return false;
+  }
+
+  // ---------- Timers ----------
+  let timerTick;
+
+  function addTimer(seconds, label) {
+    const t = { id: Date.now() + Math.random(), label, end: Date.now() + seconds * 1000, done: false };
+    state.timers.push(t);
+    speak(`Timer set for ${spokenDuration(seconds)}.`, true);
+    renderTimers();
+    if (!timerTick) timerTick = setInterval(tickTimers, 250);
+  }
+
+  function cancelTimer(id) {
+    state.timers = state.timers.filter((t) =&gt; t.id !== id);
+    renderTimers();
+  }
+
+  function tickTimers() {
+    const now = Date.now();
+    state.timers.forEach((t) =&gt; {
+      if (!t.done &amp;&amp; now &gt;= t.end) {
+        t.done = true;
+        chime();
+        speak(`Your ${t.label} timer is done.`, true);
+        toast(`${t.label}: time is up`);
+      }
+    });
+    renderTimers();
+    if (!state.timers.length) { clearInterval(timerTick); timerTick = null; }
+  }
+
+  function renderTimers() {
+    $(&quot;timersCard&quot;).hidden = !state.timers.length;
+    $(&quot;timerList&quot;).innerHTML = state.timers.map((t) =&gt; {
+      const left = Math.max(0, Math.ceil((t.end - Date.now()) / 1000));
+      return `
+        &lt;li class=&quot;timer ${t.done ? &quot;done&quot; : &quot;&quot;}&quot;&gt;
+          &lt;div&gt;&lt;div class=&quot;timer-time&quot;&gt;${t.done ? &quot;Done&quot; : formatTime(left)}&lt;/div&gt;&lt;small&gt;${t.label}&lt;/small&gt;&lt;/div&gt;
+          &lt;button class=&quot;btn btn-ghost btn-sm&quot; data-cancel-timer=&quot;${t.id}&quot;&gt;${t.done ? &quot;Dismiss&quot; : &quot;Cancel&quot;}&lt;/button&gt;
+        &lt;/li&gt;`;
+    }).join(&quot;&quot;);
+  }
+
+  function chime() {
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.35, 0.7].forEach((delay) =&gt; {
+        const o = ctx.createOscillator();
+        const g = ctx.createGain();
+        o.frequency.value = 880;
+        g.gain.setValueAtTime(0.2, ctx.currentTime + delay);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + 0.3);
+        o.connect(g).connect(ctx.destination);
+        o.start(ctx.currentTime + delay);
+        o.stop(ctx.currentTime + delay + 0.3);
+      });
+    } catch (_) { /* audio unavailable */ }
+  }
+
+  function startStepTimer() {
+    const step = currentStep();
+    if (!step.timer) { speak(&quot;This step has no timer. Say, set a timer for five minutes.&quot;, true); return; }
+    addTimer(step.timer, `Step ${state.step + 1}`);
+  }
+
+  // ---------- Voice commands ----------
+  const NUMBER_WORDS = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
+    eleven: 11, twelve: 12, fifteen: 15, twenty: 20, thirty: 30, forty: 40, &quot;forty-five&quot;: 45, sixty: 60, a: 1, an: 1 };
+
+  function toNumber(word) {
+    if (/^\d+$/.test(word)) return parseInt(word, 10);
+    return NUMBER_WORDS[word] || null;
+  }
+
+  function findIngredient(text) {
+    const words = text.replace(/how (much|many)|do i need|of|the|\?/g, &quot; &quot;).split(/\s+/).filter((w) =&gt; w.length &gt; 2);
+    let best = null;
+    let bestScore = 0;
+    state.recipe.ingredients.forEach((ing) =&gt; {
+      const name = ing.item.toLowerCase();
+      const score = words.filter((w) =&gt; name.includes(w.replace(/s$/, &quot;&quot;))).length;
+      if (score &gt; bestScore) { best = ing; bestScore = score; }
+    });
+    return best;
+  }
+
+  /** Interprets a spoken or typed phrase. Returns true when it matched. */
+  function handleCommand(raw) {
+    const text = raw.toLowerCase().trim().replace(/[.,!]/g, &quot;&quot;);
+    if (!text) return false;
+    $(&quot;heard&quot;).textContent = `Heard: \u201c${raw}\u201d`;
+
+    let m;
+    if (/\b(stop talking|be quiet|quiet|silence|shh)\b/.test(text)) { hush(); return true; }
+    if (/\b(help|what can i say|commands)\b/.test(text)) { $(&quot;helpDialog&quot;).showModal(); speak(&quot;Try next, back, repeat, tip, start timer, or how much of an ingredient.&quot;, true); return true; }
+    if ((m = text.match(/(?:go to|jump to|skip to) step (\w+)/))) {
+      const n = toNumber(m[1]);
+      if (n) { goTo(n - 1); return true; }
+    }
+    if ((m = text.match(/timer for (\w+(?:-\w+)?) (minute|minutes|second|seconds|hour|hours)/))) {
+      const n = toNumber(m[1]);
+      if (n) {
+        const mult = m[2].startsWith(&quot;hour&quot;) ? 3600 : m[2].startsWith(&quot;minute&quot;) ? 60 : 1;
+        const unit = m[2].replace(/s$/, &quot;&quot;);
+        addTimer(n * mult, `${n} ${unit}${n === 1 ? &quot;&quot; : &quot;s&quot;}`);
+        return true;
+      }
+    }
+    if (/\b(stop|cancel|clear) (the )?timer/.test(text)) {
+      const last = state.timers[state.timers.length - 1];
+      if (last) { cancelTimer(last.id); speak(&quot;Timer cancelled.&quot;, true); } else speak(&quot;No timers are running.&quot;, true);
+      return true;
+    }
+    if (/\b(start|begin|set) (the |a )?timer\b/.test(text)) { startStepTimer(); return true; }
+    if (/\bhow (much|many)\b/.test(text)) {
+      const ing = findIngredient(text);
+      if (ing) speak(`You need ${ingredientLine(ing, true)}.`, true);
+      else speak(&quot;I could not find that ingredient in this recipe.&quot;, true);
+      return true;
+    }
+    if (/\b(ingredients|what do i need)\b/.test(text)) {
+      speak(`For ${state.servings} servings you need: ${state.recipe.ingredients.map((i) =&gt; ingredientLine(i, true)).join(&quot;; &quot;)}.`, true);
+      return true;
+    }
+    if (/\b(play|show|start) (the )?(video|demo|me)\b/.test(text)) { controlVideo(&quot;play&quot;); return true; }
+    if (/\b(pause|stop) (the )?(video|demo)\b/.test(text)) { controlVideo(&quot;pause&quot;); return true; }
+    if (/\b(tip|advice|hint|any tips)\b/.test(text)) { showTip(true); return true; }
+    if (/\b(repeat|again|say that|what was that|read)\b/.test(text)) { speak(`Step ${state.step + 1}. ${currentStep().text}`, true); return true; }
+    if (/\b(back|previous|go back|last step)\b/.test(text)) { goTo(state.step - 1); return true; }
+    if (/\b(next|continue|done|ready|okay next|move on)\b/.test(text)) { goTo(state.step + 1); return true; }
+    if (/\b(exit|close|leave|quit)\b/.test(text)) { location.hash = `#/recipe/${state.recipe.id}`; return true; }
+
+    $(&quot;heard&quot;).textContent = `Not sure about \u201c${raw}\u201d. Say \u201chelp\u201d for commands.`;
+    return false;
+  }
+
+  const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognizer = null;
+
+  function startListening() {
+    if (!Recognition) {
+      toast(&quot;Voice input needs Chrome or Edge. Type commands below instead.&quot;);
+      return;
+    }
+    if (state.listening) return;
+    recognizer = new Recognition();
+    recognizer.lang = &quot;en-US&quot;;
+    recognizer.continuous = true;
+    recognizer.interimResults = false;
+    recognizer.onresult = (e) =&gt; {
+      const result = e.results[e.results.length - 1];
+      if (!result.isFinal) return;
+      const phrase = result[0].transcript;
+      // Ignore what the assistant hears of itself, except a request to stop.
+      if (window.speechSynthesis &amp;&amp; window.speechSynthesis.speaking &amp;&amp; !/stop|quiet|silence/i.test(phrase)) return;
+      handleCommand(phrase);
+    };
+    recognizer.onerror = (e) =&gt; {
+      if (e.error === &quot;not-allowed&quot; || e.error === &quot;service-not-allowed&quot;) {
+        toast(&quot;Microphone access was blocked&quot;);
+        stopListening();
+      }
+    };
+    recognizer.onend = () =&gt; { if (state.listening) { try { recognizer.start(); } catch (_) { /* restarting */ } } };
+    state.listening = true;
+    try { recognizer.start(); } catch (_) { /* already started */ }
+    updateMic();
+  }
+
+  function stopListening() {
+    state.listening = false;
+    if (recognizer) { recognizer.onend = null; try { recognizer.stop(); } catch (_) { /* idle */ } recognizer = null; }
+    updateMic();
+  }
+
+  function updateMic() {
+    const btn = $(&quot;micToggle&quot;);
+    btn.setAttribute(&quot;aria-pressed&quot;, String(state.listening));
+    btn.setAttribute(&quot;aria-label&quot;, state.listening ? &quot;Turn voice commands off&quot; : &quot;Turn voice commands on&quot;);
+    $(&quot;micLabel&quot;).textContent = state.listening ? &quot;Listening&quot; : &quot;Voice off&quot;;
+  }
+
+  // ---------- Hands-free ----------
+  async function applyHandsFree() {
+    document.body.classList.toggle(&quot;hands-free&quot;, state.handsFree);
+    $(&quot;handsFreeToggle&quot;).setAttribute(&quot;aria-pressed&quot;, String(state.handsFree));
+    localStorage.setItem(HANDS_FREE_KEY, state.handsFree ? &quot;1&quot; : &quot;0&quot;);
+
+    if (state.handsFree) {
+      if (&quot;wakeLock&quot; in navigator) {
+        try { state.wakeLock = await navigator.wakeLock.request(&quot;screen&quot;); } catch (_) { /* not granted */ }
+      }
+      if (!$(&quot;view-cook&quot;).hidden) startListening();
+    } else if (state.wakeLock) {
+      state.wakeLock.release();
+      state.wakeLock = null;
+    }
+  }
+
+  document.addEventListener(&quot;visibilitychange&quot;, () =&gt; {
+    if (document.visibilityState === &quot;visible&quot; &amp;&amp; state.handsFree) applyHandsFree();
+  });
+
+  // ---------- Routing ----------
+  function route() {
+    const [, view, id] = location.hash.split(&quot;/&quot;);
+    if (view === &quot;recipe&quot; &amp;&amp; id) openRecipe(id);
+    else if (view === &quot;cook&quot; &amp;&amp; id) {
+      if (!state.recipe || state.recipe.id !== id) openRecipe(id);
+      startCooking();
+    } else { renderLibrary(); show(&quot;library&quot;); }
+  }
+
+  // ---------- Wiring ----------
+  document.addEventListener(&quot;click&quot;, (e) =&gt; {
+    const card = e.target.closest(&quot;[data-recipe]&quot;);
+    if (card) location.hash = `#/recipe/${card.dataset.recipe}`;
+    const nav = e.target.closest(&quot;[data-nav=&#x27;library&#x27;]&quot;);
+    if (nav) location.hash = &quot;&quot;;
+    const cancel = e.target.closest(&quot;[data-cancel-timer]&quot;);
+    if (cancel) cancelTimer(Number(cancel.dataset.cancelTimer));
+  });
+
+  $(&quot;startCooking&quot;).addEventListener(&quot;click&quot;, () =&gt; (location.hash = `#/cook/${state.recipe.id}`));
+  $(&quot;exitCook&quot;).addEventListener(&quot;click&quot;, () =&gt; (location.hash = `#/recipe/${state.recipe.id}`));
+  $(&quot;servingsUp&quot;).addEventListener(&quot;click&quot;, () =&gt; setServings(state.servings + 1));
+  $(&quot;servingsDown&quot;).addEventListener(&quot;click&quot;, () =&gt; setServings(state.servings - 1));
+  $(&quot;nextStep&quot;).addEventListener(&quot;click&quot;, () =&gt; goTo(state.step + 1));
+  $(&quot;prevStep&quot;).addEventListener(&quot;click&quot;, () =&gt; goTo(state.step - 1));
+  $(&quot;repeatStep&quot;).addEventListener(&quot;click&quot;, () =&gt; speak(`Step ${state.step + 1}. ${currentStep().text}`, true));
+  $(&quot;tipStep&quot;).addEventListener(&quot;click&quot;, () =&gt; showTip(true));
+  $(&quot;timerStep&quot;).addEventListener(&quot;click&quot;, startStepTimer);
+  $(&quot;micToggle&quot;).addEventListener(&quot;click&quot;, () =&gt; (state.listening ? stopListening() : startListening()));
+  $(&quot;helpOpen&quot;).addEventListener(&quot;click&quot;, () =&gt; $(&quot;helpDialog&quot;).showModal());
+  $(&quot;profileOpen&quot;).addEventListener(&quot;click&quot;, openProfile);
+  $(&quot;handsFreeToggle&quot;).addEventListener(&quot;click&quot;, () =&gt; { state.handsFree = !state.handsFree; applyHandsFree(); });
+
+  $(&quot;commandForm&quot;).addEventListener(&quot;submit&quot;, (e) =&gt; {
+    e.preventDefault();
+    const input = $(&quot;commandInput&quot;);
+    handleCommand(input.value);
+    input.value = &quot;&quot;;
+  });
+
+  $(&quot;profileDialog&quot;).addEventListener(&quot;close&quot;, () =&gt; {
+    if ($(&quot;profileDialog&quot;).returnValue !== &quot;save&quot;) return;
+    saveProfile(readProfileForm());
+    toast(&quot;Your kitchen is saved&quot;);
+    renderLibrary();
+    if (state.recipe &amp;&amp; !$(&quot;view-overview&quot;).hidden) renderOverview();
+    if (state.recipe &amp;&amp; !$(&quot;view-cook&quot;).hidden) renderStep(false);
+  });
+
+  // Keyboard shortcuts in cook mode: arrows to move, space to repeat.
+  document.addEventListener(&quot;keydown&quot;, (e) =&gt; {
+    if ($(&quot;view-cook&quot;).hidden || e.target.matches(&quot;input, textarea&quot;) || document.querySelector(&quot;dialog[open]&quot;)) return;
+    if (e.key === &quot;ArrowRight&quot;) goTo(state.step + 1);
+    else if (e.key === &quot;ArrowLeft&quot;) goTo(state.step - 1);
+    else if (e.key === &quot; &quot;) { e.preventDefault(); speak(currentStep().text, true); }
+  });
+
+  window.addEventListener(&quot;hashchange&quot;, route);
+
+  // Expose the parser for testing and future integrations.
+  window.CookingAssistant = { handleCommand, state };
+
+  applyHandsFree();
+  route();
+  if (!localStorage.getItem(STORAGE_KEY)) setTimeout(openProfile, 400);
+})();
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+"></iframe>

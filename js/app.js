@@ -294,7 +294,7 @@
         <div class="video-placeholder">
           <div class="play" aria-hidden="true">▶</div>
           <p><strong>Technique video for step ${state.step + 1}</strong></p>
-          <p>Add a clip URL to this step in data/recipes.js.</p>
+          <p>A video demonstration for this step is coming soon.</p>
         </div>`;
       return;
     }

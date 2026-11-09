@@ -12,6 +12,10 @@ python3 -m http.server 8000
 
 Then visit `http://localhost:8000`.
 
+## Host it on Ignite
+
+`dist/ignite-embed.html` is a ready-to-paste snippet for a Custom Code element on an Ignite (GoHighLevel-style) page, and `dist/cooking-assistant.html` is the same app as one standalone file. Step-by-step instructions live in [HOSTING-IGNITE.md](HOSTING-IGNITE.md). After any change to the source files, rebuild both with `python3 tools/build.py`.
+
 ## What the prototype does
 
 The first visit opens **My kitchen**, a short profile covering skill level, dietary preferences, and allergies. The answers stay in the browser and shape the rest of the experience: beginners see a tip on every step without asking, and any ingredient that conflicts with an allergy or diet is flagged on the recipe page with a suggested swap.
@@ -43,7 +47,7 @@ Every command can also be typed into the command box in cook mode, which makes t
 
 ## Customizing the template
 
-All recipe content lives in `data/recipes.js`. Each step accepts a `video` value, which can be a YouTube link or a direct link to an `.mp4` file; a step without one shows a branded placeholder. Tips are keyed by skill level (`beginner`, `intermediate`, `confident`, or `all`), and ingredients can carry `allergens`, conflicting `diet` flags, and a `swap` suggestion.
+All recipe content lives in `data/recipes.js`. Each step accepts a `video` value, which can be a YouTube link or a direct link to an `.mp4` file; a step without one shows a branded "coming soon" panel. Tips are keyed by skill level (`beginner`, `intermediate`, `confident`, or `all`), and ingredients can carry `allergens`, conflicting `diet` flags, and a `swap` suggestion.
 
 Brand colors sit in the variables at the top of `css/styles.css`. The palette ships in navy and gold.
 
@@ -59,6 +63,9 @@ index.html        Page structure and dialogs
 css/styles.css    Palette, layout, and hands-free styles
 js/app.js         Views, scaling, timers, speech, and command parsing
 data/recipes.js   Recipe library
+tools/build.py    Bundles everything into dist/ for hosting
+dist/             Generated single-file page and Ignite embed
+HOSTING-IGNITE.md Ignite setup guide
 ```
 
 ## Paths to a full product
